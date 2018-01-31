@@ -1,0 +1,11 @@
+Package: clusterMultinomial
+Type: Package
+Title: Hierarchical clustering of multinomial data
+Version: 1.0
+Author: Bo Markussen
+Maintainer: Bo Markussen <bomar@math.ku.dk>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-2
+Depends: ggplot2, scales
+LazyData: true

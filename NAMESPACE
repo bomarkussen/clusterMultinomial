@@ -1,0 +1,8 @@
+importFrom("graphics", "axTicks", "axis", "legend", "lines", "plot","points", "text")
+importFrom("stats", "binomial", "coef", "fitted.values", "glm","p.adjust", "pchisq", "reformulate")
+importFrom("ggplot2","theme","theme_set","theme_bw","ggplot","aes","geom_point","geom_abline","facet_grid",
+           "scale_x_continuous","scale_y_continuous","xlab","ylab","scale_color_manual")
+importFrom("scales","percent")
+exportPattern("^[[:alpha:]]+")
+S3method("plot", "multinomClust")
+S3method("predict", "multinomClust")
