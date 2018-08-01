@@ -178,7 +178,7 @@ cluster <- function(Y_data,X_data=NULL,logit.model=NULL,ordering=NULL,method="pv
   }
 
   # number of clusters
-  tmp <- p.adjust(rev(SEScluster$p.list),"holm") < 0.05
+  tmp <- p.adjust(rev(p.list),"holm") < 0.05
   if (!tmp[1])            number.clusters <- 1
   if (all(tmp))           number.clusters <- length(tmp)
   if (tmp[1] & any(!tmp)) number.clusters <- which.min(tmp)

@@ -12,34 +12,30 @@ plot.multinomClust <- function(x,what="dendrogram",add.names=TRUE,number.cluster
 
   # dendrogram ----------------------------------
   if (is.element(1,what)) {
-    # Define list of colors via significance level
-    col.list <- c("red","green")[1+(p.adjust(x$p.list,pval.correction)>significance.level)]
-    col.list[x$LR.list<0] <- "blue"
+    # Define list of colors via significance level: red=1, green=2, blue=3
+    col.list <- 1+(p.adjust(x$p.list,pval.correction)>significance.level)
+    col.list[x$LR.list<0] <- 3
 
     # Initialize likelihood positions
     x.nlogL  <- x$nlogL.final-x$nlogL.initial
     y.pos    <- order(unlist(x$clusters))
     cluster2 <- x$clusters.initial
 
-    # Make window
-    x.length <- max(x.nlogL)
-    plot(c(-0.1*x.length,1.1*x.length),
-         c(0,length(y.pos)),type="n",axes=FALSE,
-         xlab="log(likelihood ratio)",ylab="observation index")
-#         main="Joint likelihood: red=(*), green=NS, blue=increase")
-    tmp <- axTicks(1)
-    i <- which.min(abs(max(x$nlogL.final)-tmp))
-    if (max(x$nlogL.final)<tmp[i]) {tmp <- tmp[-1]; i <- i-1} #else {tmp <- tmp[-length(tmp)]}
-    axis(1,max(x$nlogL.final)+tmp-tmp[i],labels=paste(abs(tmp-tmp[i])))
+    # Make x scale
+    tmp <- pretty(c(0,0.8*max(x.nlogL)))
+    axis.x <- max(x$nlogL.final)-rev(tmp)
+    axis.labels <- paste(rev(tmp))
 
     # Add names?
+    mynames <- NULL
     if (is.logical(add.names)) {
-      if (add.names) text(x.nlogL[unlist(x$clusters)],1:length(y.pos),paste(unlist(x$clusters)),pos=4)
+      if (add.names) mynames <- data.frame(x=x.nlogL[unlist(x$clusters)],y=1:length(y.pos),label=paste(unlist(x$clusters)),hjust=0)
     } else {
-      text(x.nlogL[unlist(x$clusters)],1:length(y.pos),add.names[unlist(x$clusters)],pos=4)
+      mynames <- data.frame(x=x.nlogL[unlist(x$clusters)],y=1:length(y.pos),label=add.names[unlist(x$clusters)],hjust=0)
     }
 
-    # Add lines
+    # Make dendrogram
+    mylines <- data.frame(x=NULL,xend=NULL,y=NULL,yend=NULL,col=NULL)
     for (i in 1:length(x$LR.list)) {
       group1 <- cluster2[[x$i.list[i]]]
       group2 <- cluster2[[x$j.list[i]]]
@@ -49,25 +45,34 @@ plot.multinomClust <- function(x,what="dendrogram",add.names=TRUE,number.cluster
       nlogL2 <- unique(x.nlogL[group2])
       new.nlogL <- nlogL1-abs(x$LR.list[i])
 
-      # Plot lines
-      lines(c(nlogL1,new.nlogL),rep(pos1,2),col=col.list[i])
-      lines(c(nlogL2,new.nlogL),rep(pos2,2),col=col.list[i])
-      lines(rep(new.nlogL,2),c(pos1,pos2),col=col.list[i])
+      # Add lines
+      mylines <- rbind(mylines,
+                       data.frame(x=c(nlogL1,nlogL2,new.nlogL),xend=rep(new.nlogL,3),y=c(pos1,pos2,pos1),yend=c(pos1,pos2,pos2),col=rep(col.list[i],3)))
 
       # Collapse clusters
       if (mean(x$ordering[cluster2[[x$i.list[i]]]]) > mean(x$ordering[cluster2[[x$j.list[i]]]])) {
-          cluster2[[x$i.list[i]]] <- c(cluster2[[x$j.list[i]]],cluster2[[x$i.list[i]]])
+        cluster2[[x$i.list[i]]] <- c(cluster2[[x$j.list[i]]],cluster2[[x$i.list[i]]])
       } else {
-          cluster2[[x$i.list[i]]] <- c(cluster2[[x$i.list[i]]],cluster2[[x$j.list[i]]])
+        cluster2[[x$i.list[i]]] <- c(cluster2[[x$i.list[i]]],cluster2[[x$j.list[i]]])
       }
       cluster2                       <- cluster2[-x$j.list[i]]
       x.nlogL[cluster2[[x$i.list[i]]]] <- new.nlogL
       y.pos[cluster2[[x$i.list[i]]]]   <- (pos1+pos2)/2
     }
 
-    # empty result
-    m <- NULL
+    # return result
+    m <- ggplot() +
+      geom_segment(aes(x=x,y=y,xend=xend,yend=yend,col=factor(col)),mylines) +
+      scale_color_manual(values=c("red","green","blue")) +
+      scale_x_continuous(breaks=axis.x,labels=axis.labels) +
+      scale_y_continuous(breaks=NULL) +
+      xlab("log(likelihood ratio)") +
+      ylab("observation index") +
+      guides(col=FALSE) +
+      theme_classic()
+    if (!is.null(mynames)) m <- m + geom_text(aes(x=x,y=y,label=label,hjust=hjust),mynames)
   }
+
 
   # p-values --------------------------
   if (is.element(2,what)) {
@@ -82,12 +87,13 @@ plot.multinomClust <- function(x,what="dendrogram",add.names=TRUE,number.cluster
                        accepted=col.list)
 
     # make plot of p-values
-    theme_set(theme_bw())
+    #theme_set(theme_bw())
     m <- ggplot(pval,aes(x=1/theoretical,y=1/observed,color=accepted)) + geom_point() +
       scale_x_continuous(trans="log10") + scale_y_continuous(trans="log10") +
       scale_color_manual(values=c("red","green","blue")) +
       geom_abline(intercept=0,slope=1,col="green") +
-      xlab("1/uniform distribution") + ylab("1/observed p-values")
+      xlab("1/uniform distribution") + ylab("1/observed p-values") +
+      theme_bw()
   }
 
 
@@ -113,6 +119,6 @@ plot.multinomClust <- function(x,what="dendrogram",add.names=TRUE,number.cluster
       ylab("Proportion within cluster") + xlab("") + theme(axis.text.x=element_text(angle=90,vjust=0.5))
   }
 
-  # return NULL
+  # return ggplot-object
   return(m)
 }

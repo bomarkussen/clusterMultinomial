@@ -13,7 +13,7 @@
     \item{\code{dpi}}{days post insamination}
     \item{\code{GL}}{greatest length}
     \item{\samp{Neural tube}}{a factor with levels \code{Primitive streak} \code{Neural folds closure} \code{Anterior neuropore closed} \code{Neuropores closed}}
-    \item{\code{Somites}}{a factor with levels \code{6-10 pairs} \code{11-15 pairs} \code{16-20 pairs} \code{21-25 pairs} \code{26-30 pairs} \code{31-35 pairs} \code{36-40 pairs} \code{41-45 pairs} \code{46-50 pairs} \code{Hard count}}
+    \item{\code{Somites}}{a factor with levels \code{6-10 pairs} \code{11-15 pairs} \code{16-20 pairs} \code{21-25 pairs} \code{26-30 pairs} \code{31-35 pairs} \code{36-40 pairs} \code{41-45 pairs} \code{46-50 pairs} \code{>50 pairs}}
     \item{\code{Head}}{a factor with levels \code{Head bulbus} \code{Anterior cephalic projection} \code{Head projection disappeared}}
     \item{\code{Nose}}{a factor with levels \code{Olfactory pit} \code{External nares}}
     \item{\code{Ear}}{a factor with levels \code{Otic pit} \code{Otic vesicle} \code{Pinna fold}}
