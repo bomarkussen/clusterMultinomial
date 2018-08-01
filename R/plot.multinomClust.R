@@ -100,23 +100,26 @@ plot.multinomClust <- function(x,what="dendrogram",add.names=TRUE,number.cluster
   # histograms -------------------------
   if (is.element(3,what)) {
     # cluster, category, response, proportion
-    mydf <- data.frame(cluster=NULL,category=NULL,response=NULL,prop=NULL)
+    mydf <- data.frame()
     for (i in 1:number.clusters) {
       for (j in 1:ncol(x$Y_data)) {
         tmp <- x$test.data[x$clusters.sequence[[number.clusters]][[i]],x$category.first[j]:x$category.last[j],drop=FALSE]
         tmp <- apply(tmp,2,mean)
-        mydf <- rbind(mydf,data.frame(cluster=i,category=x$category.names[j],response=names(tmp),prop=tmp))
+        mydf <- rbind(mydf,data.frame(cluster=i,
+                                      category=x$category.names[j],response=names(tmp),
+                                      x=paste(x$category.names[j],names(tmp),sep=":"),prop=tmp))
       }
     }
 
-    theme_set(theme_bw())
-
-    mydf2 <- subset(mydf,(response!=0)&(is.element(category,variables)))
+    mydf2 <- subset(mydf,is.element(category,variables))
     mydf2$category <- droplevels(mydf2$category)
-    mydf2$response <- factor(mydf2$response,levels=unique(mydf2$response))
-    m <- ggplot(mydf2,aes(x=response,y=prop),ylim=c(0,1)) + scale_y_continuous(breaks=seq(0,1,1),labels=scales::percent) +
+    mydf2$x <- factor(mydf2$x,levels=unique(mydf2$x))
+
+    m <- ggplot(mydf2,aes(x=x,y=prop),ylim=c(0,1)) + scale_y_continuous(breaks=seq(0,1,1),labels=scales::percent) +
       facet_grid(cluster~category,scales="free_x",space="free_x") + geom_col() +
-      ylab("Proportion within cluster") + xlab("") + theme(axis.text.x=element_text(angle=90,vjust=0.5))
+      ylab("Proportion within cluster") + xlab("") +
+      scale_x_discrete(breaks=mydf2$x,labels=mydf2$response) +
+      theme_bw() + theme(axis.text.x=element_text(angle=90,vjust=0.5))
   }
 
   # return ggplot-object
